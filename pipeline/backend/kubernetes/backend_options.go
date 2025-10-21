@@ -59,6 +59,7 @@ type SecurityContext struct {
 	FsGroupChangePolicy *v1.PodFSGroupChangePolicy `mapstructure:"fsGroupChangePolicy"`
 	SeccompProfile      *SecProfile                `mapstructure:"seccompProfile"`
 	ApparmorProfile     *SecProfile                `mapstructure:"apparmorProfile"`
+	Capabilities        *v1.Capabilities           `mapstructure:"capabilities"`
 }
 
 type SecProfile struct {

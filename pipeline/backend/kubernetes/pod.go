@@ -55,6 +55,11 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
+	// Added to remove further dependency on deprecated Step configuration
+	if step.Privileged {
+		options.SecurityContext.Privileged = &step.Privileged
+	}
+
 	spec, err := podSpec(step, config, options, nsp)
 	if err != nil {
 		return nil, err
@@ -182,7 +187,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
+		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext),
 	}
 
 	// If there are tolerations and they are allowed
@@ -230,7 +235,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		Image:           step.Image,
 		WorkingDir:      step.WorkingDir,
 		Ports:           containerPorts(step.Ports),
-		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
+		SecurityContext: containerSecurityContext(options.SecurityContext),
 	}
 
 	if step.Pull {
@@ -465,7 +470,7 @@ func toleration(backendToleration Toleration) v1.Toleration {
 	}
 }
 
-func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
+func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
 	var (
 		nonRoot             *bool
 		user                *int64
@@ -485,17 +490,17 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 	if sc != nil {
 		// only allow to set user if its not root or step is privileged
-		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || stepPrivileged) {
+		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || *sc.Privileged) {
 			user = sc.RunAsUser
 		}
 
 		// only allow to set group if its not root or step is privileged
-		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || stepPrivileged) {
+		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || *sc.Privileged) {
 			group = sc.RunAsGroup
 		}
 
 		// only allow to set fsGroup if its not root or step is privileged
-		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
+		if sc.FSGroup != nil && (*sc.FSGroup != 0 || *sc.Privileged) {
 			fsGroup = sc.FSGroup
 		}
 
@@ -563,33 +568,24 @@ func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
 	return apparmorProfile
 }
 
-func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
-	if !stepPrivileged {
+func containerSecurityContext(sc *SecurityContext) *v1.SecurityContext {
+	if sc == nil {
 		return nil
 	}
 
-	//nolint:staticcheck
-	privileged := false
+	actualSc := new(v1.SecurityContext)
+	// if any container capabilities are passed
+	if sc.Capabilities != nil {
+		actualSc.Capabilities = sc.Capabilities
+	}
 
 	// if security context privileged is set explicitly
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		privileged = true
+	if sc.Privileged != nil {
+		actualSc.Privileged = sc.Privileged
 	}
 
-	// if security context privileged is not set explicitly, but step is privileged
-	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
-		privileged = true
-	}
-
-	if privileged {
-		securityContext := &v1.SecurityContext{
-			Privileged: newBool(true),
-		}
-		log.Trace().Msgf("container security context that will be used: %v", securityContext)
-		return securityContext
-	}
-
-	return nil
+	log.Trace().Msgf("container security context that will be used: %v", actualSc)
+	return actualSc
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

@@ -16,13 +16,14 @@ package types
 
 // Step defines a container process.
 type Step struct {
-	Name           string            `json:"name"`
-	OrgID          int64             `json:"org_id,omitempty"`
-	UUID           string            `json:"uuid"`
-	Type           StepType          `json:"type,omitempty"`
-	Image          string            `json:"image,omitempty"`
-	Pull           bool              `json:"pull,omitempty"`
-	Detached       bool              `json:"detach,omitempty"`
+	Name     string   `json:"name"`
+	OrgID    int64    `json:"org_id,omitempty"`
+	UUID     string   `json:"uuid"`
+	Type     StepType `json:"type,omitempty"`
+	Image    string   `json:"image,omitempty"`
+	Pull     bool     `json:"pull,omitempty"`
+	Detached bool     `json:"detach,omitempty"`
+	// Deprecated: Privilege should be set using backendoptions securityContext instead of step configuration
 	Privileged     bool              `json:"privileged,omitempty"`
 	WorkingDir     string            `json:"working_dir,omitempty"`
 	WorkspaceBase  string            `json:"workspace_base,omitempty"`
