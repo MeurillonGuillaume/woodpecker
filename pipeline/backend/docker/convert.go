@@ -74,7 +74,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
+func toHostConfig(step *types.Step, conf *config, opts BackendOptions) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   conf.resourceLimit.CPUQuota,
@@ -88,6 +88,11 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 			Type: "json-file",
 		},
 		Privileged: step.Privileged,
+	}
+
+	if opts.Capabilities != nil {
+		config.CapAdd = opts.Capabilities.Add
+		config.CapDrop = opts.Capabilities.Drop
 	}
 
 	if len(step.NetworkMode) != 0 {

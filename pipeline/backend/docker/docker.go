@@ -173,7 +173,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	config := e.toConfig(step, options)
-	hostConfig := toHostConfig(step, &e.config)
+	hostConfig := toHostConfig(step, &e.config, options)
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
