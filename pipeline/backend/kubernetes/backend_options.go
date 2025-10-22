@@ -59,7 +59,31 @@ type SecurityContext struct {
 	FsGroupChangePolicy *v1.PodFSGroupChangePolicy `mapstructure:"fsGroupChangePolicy"`
 	SeccompProfile      *SecProfile                `mapstructure:"seccompProfile"`
 	ApparmorProfile     *SecProfile                `mapstructure:"apparmorProfile"`
-	Capabilities        *v1.Capabilities           `mapstructure:"capabilities"`
+	Capabilities        *Capabilities              `mapstructure:"capabilities"`
+}
+
+type (
+	Capabilities struct {
+		Add  CapabilitySet `mapstructure:"add"`
+		Drop CapabilitySet `mapstructure:"drop"`
+	}
+
+	CapabilitySet []string
+)
+
+func (cs CapabilitySet) AsCapabilityList() []v1.Capability {
+	result := make([]v1.Capability, len(cs))
+	for idx, item := range cs {
+		result[idx] = v1.Capability(item)
+	}
+	return result
+}
+
+func (c Capabilities) AsBuiltins() *v1.Capabilities {
+	return &v1.Capabilities{
+		Add:  c.Add.AsCapabilityList(),
+		Drop: c.Drop.AsCapabilityList(),
+	}
 }
 
 type SecProfile struct {

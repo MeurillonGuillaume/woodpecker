@@ -576,7 +576,7 @@ func containerSecurityContext(sc *SecurityContext) *v1.SecurityContext {
 	actualSc := new(v1.SecurityContext)
 	// if any container capabilities are passed
 	if sc.Capabilities != nil {
-		actualSc.Capabilities = sc.Capabilities
+		actualSc.Capabilities = sc.Capabilities.AsBuiltins()
 	}
 
 	// if security context privileged is set explicitly
