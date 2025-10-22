@@ -490,17 +490,17 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig) *
 
 	if sc != nil {
 		// only allow to set user if its not root or step is privileged
-		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || *sc.Privileged) {
+		if sc.RunAsUser != nil {
 			user = sc.RunAsUser
 		}
 
 		// only allow to set group if its not root or step is privileged
-		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || *sc.Privileged) {
+		if sc.RunAsGroup != nil {
 			group = sc.RunAsGroup
 		}
 
 		// only allow to set fsGroup if its not root or step is privileged
-		if sc.FSGroup != nil && (*sc.FSGroup != 0 || *sc.Privileged) {
+		if sc.FSGroup != nil {
 			fsGroup = sc.FSGroup
 		}
 
