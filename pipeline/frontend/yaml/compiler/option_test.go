@@ -162,3 +162,9 @@ func TestWithTrustedClonePlugins(t *testing.T) {
 	compiler = New()
 	assert.ElementsMatch(t, constant.TrustedClonePlugins, compiler.trustedClonePlugins)
 }
+
+func TestWithPreWorkflowPlugins(t *testing.T) {
+	var name = "my-pre-workflow-plugin-image"
+	compiler := New(WithPreWorkflowPlugins(name))
+	assert.ElementsMatch(t, []string{name}, compiler.preWorkflowPlugins)
+}

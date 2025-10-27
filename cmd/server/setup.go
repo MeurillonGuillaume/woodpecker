@@ -195,6 +195,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.TrustedClonePlugins = c.StringSlice("plugins-trusted-clone")
 	server.Config.Pipeline.TrustedClonePlugins = append(server.Config.Pipeline.TrustedClonePlugins, server.Config.Pipeline.DefaultClonePlugin)
 
+	// Pre-workflow plugins
+	server.Config.Pipeline.PreWorkflowPlugins = c.StringSlice("pre-workflow-plugins")
+
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
 	events := make([]model.WebhookEvent, 0, len(_events))

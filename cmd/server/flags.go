@@ -205,6 +205,14 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PRE_WORKFLOW_PLUGINS"),
+		Name:    "pre-workflow-plugins",
+		Usage:   "List of plugins to be executed by default before any user-defined workflows run",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
 		Name:    "session-expires",

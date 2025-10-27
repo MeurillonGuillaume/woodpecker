@@ -173,6 +173,14 @@ func WithTrustedSecurity(trusted bool) Option {
 	}
 }
 
+// WithPreWorkflowPlugins configures a List of plugins to be executed by
+// default before any user-defined workflows run.
+func WithPreWorkflowPlugins(plugins ...string) Option {
+	return func(c *Compiler) {
+		c.preWorkflowPlugins = plugins
+	}
+}
+
 type ProxyOptions struct {
 	NoProxy    string
 	HTTPProxy  string

@@ -330,6 +330,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrustedSecurity(b.Repo.Trusted.Security),
+		compiler.WithPreWorkflowPlugins(server.Config.Pipeline.PreWorkflowPlugins...),
 	).Compile(parsed)
 }
 
