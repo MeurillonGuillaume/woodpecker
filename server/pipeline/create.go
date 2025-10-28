@@ -79,13 +79,15 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	// fetch the pipeline file from the forge
 	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
 	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
-	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) && !server.Config.Pipeline.AllowEmptyWorkflow {
-		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		if err := _store.DeletePipeline(pipeline); err != nil {
-			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
-		}
+	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
+		if !server.Config.Pipeline.AllowEmptyWorkflow {
+			log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+			if err := _store.DeletePipeline(pipeline); err != nil {
+				log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
+			}
 
-		return nil, ErrFiltered
+			return nil, ErrFiltered
+		}
 	} else if configFetchErr != nil {
 		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", configFetchErr))
