@@ -73,6 +73,7 @@ var Config = struct {
 		DefaultClonePlugin                  string
 		TrustedClonePlugins                 []string
 		PreWorkflowPlugins                  map[string]string
+		AllowEmptyWorkflow                  bool
 		Volumes                             []string
 		Networks                            []string
 		PrivilegedPlugins                   []string

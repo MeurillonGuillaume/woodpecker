@@ -213,6 +213,11 @@ var flags = append([]cli.Flag{
 			TrimSpace: true,
 		},
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_ALLOW_EMPTY_WORKFLOW"),
+		Name:    "allow-empty-workflow",
+		Usage:   "Enables Woodpecker to run the default clone & configured pre-workflow plugins to run even if there is no configured workflow in the repository.",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
 		Name:    "session-expires",

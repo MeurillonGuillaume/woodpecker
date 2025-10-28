@@ -197,6 +197,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 
 	// Pre-workflow plugins
 	server.Config.Pipeline.PreWorkflowPlugins = c.StringMap("pre-workflow-plugins")
+	server.Config.Pipeline.AllowEmptyWorkflow = c.Bool("allow-empty-workflows")
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
