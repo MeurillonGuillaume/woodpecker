@@ -870,8 +870,15 @@ A map of Plugins to be executed before a user-defined Workflow is started, after
 Map notation is in the form of
 
 ```
-name:plugin-source
+name=plugin-source
 ```
+
+### DEFAULT_ALLOW_EMPTY_WORKFLOW
+
+- Name: `WOODPECKER_DEFAULT_ALLOW_EMPTY_WORKFLOW`
+- Default: `false`
+
+Enables Woodpecker to run the default clone & configured pre-workflow plugins to run even if there is no configured workflow in the repository.
 
 ---
 
