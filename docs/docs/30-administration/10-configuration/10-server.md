@@ -863,9 +863,15 @@ The maximum time in minutes you can set in the repo settings before a pipeline g
 ### DEFAULT_PRE_WORKFLOW_PLUGINS
 
 - Name: `WOODPECKER_DEFAULT_PRE_WORKFLOW_PLUGINS`
-- Default: `[]`
+- Default: `{}`
 
-A list of Plugins to be executed before a user-defined Workflow is started, after the Clone step has been performed, if any.
+A map of Plugins to be executed before a user-defined Workflow is started, after the Clone step has been performed, if any.
+
+Map notation is in the form of
+
+```
+name:plugin-source
+```
 
 ---
 

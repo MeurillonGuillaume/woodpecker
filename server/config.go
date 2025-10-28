@@ -72,7 +72,7 @@ var Config = struct {
 		DefaultWorkflowLabels               map[string]string
 		DefaultClonePlugin                  string
 		TrustedClonePlugins                 []string
-		PreWorkflowPlugins                  []string
+		PreWorkflowPlugins                  map[string]string
 		Volumes                             []string
 		Networks                            []string
 		PrivilegedPlugins                   []string

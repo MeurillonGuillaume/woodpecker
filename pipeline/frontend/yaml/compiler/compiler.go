@@ -94,7 +94,7 @@ type Compiler struct {
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
-	preWorkflowPlugins      []string
+	preWorkflowPlugins      map[string]string
 }
 
 // New creates a new Compiler with options.
@@ -201,9 +201,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	if !c.local && len(c.preWorkflowPlugins) > 0 {
 		stage := new(backend_types.Stage)
 
-		for idx, plugin := range c.preWorkflowPlugins {
+		for name, plugin := range c.preWorkflowPlugins {
 			container := &yaml_types.Container{
-				Name:  fmt.Sprintf("Pre workflow plugin (%d/%d)", idx+1, len(c.preWorkflowPlugins)),
+				Name:  name,
 				Image: plugin,
 			}
 
