@@ -30,25 +30,26 @@ import (
 )
 
 const (
-	pathUser          = "%s/2.0/user/"
-	pathEmails        = "%s/2.0/user/emails"
-	pathPermission    = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathPermissions   = "%s/2.0/user/permissions/repositories?%s"
-	pathWorkspaces    = "%s/2.0/workspaces/?%s"
-	pathWorkspace     = "%s/2.0/workspaces/%s"
-	pathRepo          = "%s/2.0/repositories/%s/%s"
-	pathRepos         = "%s/2.0/repositories/%s?%s"
-	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
-	pathHooks         = "%s/2.0/repositories/%s/%s/hooks?%s"
-	pathSource        = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
-	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
-	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
-	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
-	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
-	pathDiffStat      = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
-	pageSize          = 100
+	pathUser             = "%s/2.0/user/"
+	pathEmails           = "%s/2.0/user/emails"
+	pathPermission       = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermissions      = "%s/2.0/user/permissions/repositories?%s"
+	pathWorkspaces       = "%s/2.0/workspaces/?%s"
+	pathWorkspace        = "%s/2.0/workspaces/%s"
+	pathRepo             = "%s/2.0/repositories/%s/%s"
+	pathRepos            = "%s/2.0/repositories/%s?%s"
+	pathHook             = "%s/2.0/repositories/%s/%s/hooks/%s"
+	pathHooks            = "%s/2.0/repositories/%s/%s/hooks?%s"
+	pathSource           = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pathStatus           = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
+	pathBranches         = "%s/2.0/repositories/%s/%s/refs/branches?%s"
+	pathOrgPerms         = "%s/2.0/workspaces/%s/permissions?%s"
+	pathPullRequests     = "%s/2.0/repositories/%s/%s/pullrequests?%s"
+	pathPullRequestsByID = "%s/2.0/repositories/%s/%s/pullrequests/%d"
+	pathBranchCommits    = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathDir              = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pathDiffStat         = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
+	pageSize             = 100
 )
 
 type Client struct {
@@ -236,12 +237,12 @@ func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRe
 	return out.Values, err
 }
 
-func (c *Client) ListChangedFiles(owner, name, commit string) (result []string, err error) {
+func (c *Client) ListChangedFiles(owner, name, ref string) (result []string, err error) {
 	paths := make(map[string]struct{})
 	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
 		var resp DiffStatResp
-		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, commit, opts.Encode())
+		uri := fmt.Sprintf(pathDiffStat, c.base, owner, name, ref, opts.Encode())
 		if _, err = c.do(uri, http.MethodGet, nil, &resp); err != nil {
 			return nil, err
 		}
@@ -270,6 +271,13 @@ func (c *Client) ListChangedFiles(owner, name, commit string) (result []string, 
 		result = append(result, path)
 	}
 	return result, err
+}
+
+func (c *Client) GetPullRequestByID(owner, name string, ID int) (*PullRequest, error) {
+	var out PullRequest
+	uri := fmt.Sprintf(pathPullRequestsByID, c.base, owner, name, ID)
+	_, err := c.do(uri, http.MethodGet, nil, &out)
+	return &out, err
 }
 
 func (c *Client) GetWorkspace(name string) (*Workspace, error) {

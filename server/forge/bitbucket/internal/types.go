@@ -279,8 +279,14 @@ type PullRequestResp struct {
 }
 
 type PullRequest struct {
-	ID    uint   `json:"id"`
-	Title string `json:"title"`
+	ID          uint                   `json:"id"`
+	Title       string                 `json:"title"`
+	Source      *PullRequestOriginDest `json:"source"`
+	Destination *PullRequestOriginDest `json:"destination"`
+}
+
+type PullRequestOriginDest struct {
+	Commit Commit `json:"commit"`
 }
 
 type CommitsResp struct {

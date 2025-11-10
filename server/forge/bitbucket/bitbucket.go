@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"golang.org/x/oauth2"
 
@@ -410,9 +411,38 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
-	if err != nil {
-		return nil, nil, err
+	switch pl.Event {
+	case model.EventPush:
+		// List only the latest push changes
+		pl.ChangedFiles, err = c.newClient(ctx, u).ListChangedFiles(repo.Owner, repo.Name, pl.Commit)
+		if err != nil {
+			return nil, nil, err
+		}
+	case model.EventPull:
+		client := c.newClient(ctx, u)
+
+		prID, err := strconv.Atoi(strings.Split(pl.Ref, "/")[2])
+		if err != nil {
+			return nil, nil, err
+		}
+
+		pr, err := client.GetPullRequestByID(repo.Owner, repo.Name, prID)
+		if err != nil {
+			return nil, nil, err
+		}
+		if pr == nil {
+			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
+		}
+		if pr.Source == nil || pr.Destination == nil {
+			return nil, nil, fmt.Errorf("can't run hook with missing PR source or destination")
+		}
+
+		// List all changes between source & destination commit
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s...%s", pr.Source.Commit.Hash, pr.Destination.Commit.Hash))
+		if err != nil {
+			return nil, nil, err
+		}
+	default:
 	}
 
 	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
