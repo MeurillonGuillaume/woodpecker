@@ -46,7 +46,7 @@ const (
 	pathOrgPerms         = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests     = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathPullRequestsByID = "%s/2.0/repositories/%s/%s/pullrequests/%d"
-	pathBranchCommits    = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathBranchCommits    = "%s/2.0/repositories/%s/%s/commits/%s?%s"
 	pathDir              = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pathDiffStat         = "%s/2.0/repositories/%s/%s/diffstat/%s?%s"
 	pageSize             = 100
@@ -197,7 +197,7 @@ func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, er
 
 func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	out := new(CommitsResp)
-	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
+	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch, "")
 	_, err := c.do(uri, http.MethodGet, nil, out)
 	if err != nil {
 		return nil, err
@@ -206,6 +206,29 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) GetBranchRoot(owner, name, branch string) (*Commit, error) {
+	out := new(CommitsResp)
+	opts := &ListOpts{Page: 1, PageLen: pageSize}
+	for {
+		uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch, opts.Encode())
+		_, err := c.do(uri, http.MethodGet, nil, out)
+		if err != nil {
+			return nil, err
+		}
+
+		if len(out.Values) == 0 {
+			return nil, fmt.Errorf("no commits in branch %s", branch)
+		}
+
+		if out.Next == nil {
+			break
+		}
+		opts.Page++
+	}
+
+	return out.Values[len(out.Values)-1], nil
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {

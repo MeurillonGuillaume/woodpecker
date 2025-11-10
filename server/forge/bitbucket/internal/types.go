@@ -290,7 +290,10 @@ type PullRequestOriginDest struct {
 }
 
 type CommitsResp struct {
-	Values []*Commit `json:"values"`
+	Page    uint      `json:"page"`
+	PageLen uint      `json:"pagelen"`
+	Next    *string   `json:"next"`
+	Values  []*Commit `json:"values"`
 }
 
 type Commit struct {

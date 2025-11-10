@@ -430,15 +430,17 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		if err != nil {
 			return nil, nil, err
 		}
-		if pr == nil {
+		if pr == nil || pr.Destination == nil {
 			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
 		}
-		if pr.Source == nil || pr.Destination == nil {
-			return nil, nil, fmt.Errorf("can't run hook with missing PR source or destination")
+
+		sourceBranchRoot, err := client.GetBranchRoot(repo.Owner, repo.Name, repo.Branch)
+		if err != nil {
+			return nil, nil, err
 		}
 
 		// List all changes between source & destination commit
-		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.Source.Commit.Hash, pr.Destination.Commit.Hash))
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", sourceBranchRoot.Hash, pr.Destination.Commit.Hash))
 		if err != nil {
 			return nil, nil, err
 		}
