@@ -438,7 +438,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		}
 
 		// List all changes between source & destination commit
-		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s...%s", pr.Source.Commit.Hash, pr.Destination.Commit.Hash))
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.Source.Commit.Hash, pr.Destination.Commit.Hash))
 		if err != nil {
 			return nil, nil, err
 		}
