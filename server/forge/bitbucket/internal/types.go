@@ -283,10 +283,6 @@ type PullRequest struct {
 	Title string `json:"title"`
 }
 
-type PullRequestOriginDest struct {
-	Commit Commit `json:"commit"`
-}
-
 type CommitsResp struct {
 	Values []*Commit `json:"values"`
 }
