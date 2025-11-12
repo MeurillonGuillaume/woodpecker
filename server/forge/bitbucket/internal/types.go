@@ -279,10 +279,8 @@ type PullRequestResp struct {
 }
 
 type PullRequest struct {
-	ID          uint                   `json:"id"`
-	Title       string                 `json:"title"`
-	Source      *PullRequestOriginDest `json:"source"`
-	Destination *PullRequestOriginDest `json:"destination"`
+	ID    uint   `json:"id"`
+	Title string `json:"title"`
 }
 
 type PullRequestOriginDest struct {
@@ -290,10 +288,7 @@ type PullRequestOriginDest struct {
 }
 
 type CommitsResp struct {
-	Page    uint      `json:"page"`
-	PageLen uint      `json:"pagelen"`
-	Next    *string   `json:"next"`
-	Values  []*Commit `json:"values"`
+	Values []*Commit `json:"values"`
 }
 
 type Commit struct {
