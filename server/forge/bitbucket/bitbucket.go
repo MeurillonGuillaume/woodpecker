@@ -424,7 +424,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
 		}
 
-		// List all changes between source & destination commit
+		// List all changes between source & destination branch
 		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
 		if err != nil {
 			return nil, nil, err
