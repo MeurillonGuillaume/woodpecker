@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
-	"strings"
 
 	"golang.org/x/oauth2"
 
@@ -401,7 +400,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
 func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	repo, pl, err := parseHook(req)
+	pr, repo, pl, err := parseHook(req)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -421,26 +420,12 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 	case model.EventPull:
 		client := c.newClient(ctx, u)
 
-		prID, err := strconv.Atoi(strings.Split(pl.Ref, "/")[2])
-		if err != nil {
-			return nil, nil, err
-		}
-
-		pr, err := client.GetPullRequestByID(repo.Owner, repo.Name, prID)
-		if err != nil {
-			return nil, nil, err
-		}
-		if pr == nil || pr.Destination == nil {
+		if pr == nil {
 			return nil, nil, fmt.Errorf("can't run hook against empty PR information")
 		}
 
-		sourceBranchRoot, err := client.GetBranchRoot(repo.Owner, repo.Name, repo.Branch)
-		if err != nil {
-			return nil, nil, err
-		}
-
 		// List all changes between source & destination commit
-		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", sourceBranchRoot.Hash, pr.Destination.Commit.Hash))
+		pl.ChangedFiles, err = client.ListChangedFiles(repo.Owner, repo.Name, fmt.Sprintf("%s..%s", pr.PullRequest.Source.Branch.Name, pr.PullRequest.Dest.Branch.Name))
 		if err != nil {
 			return nil, nil, err
 		}

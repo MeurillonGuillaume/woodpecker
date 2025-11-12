@@ -208,29 +208,6 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	return out.Values[0], nil
 }
 
-func (c *Client) GetBranchRoot(owner, name, branch string) (*Commit, error) {
-	out := new(CommitsResp)
-	opts := &ListOpts{Page: 1, PageLen: pageSize}
-	for {
-		uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch, opts.Encode())
-		_, err := c.do(uri, http.MethodGet, nil, out)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(out.Values) == 0 {
-			return nil, fmt.Errorf("no commits in branch %s", branch)
-		}
-
-		if out.Next == nil {
-			break
-		}
-		opts.Page++
-	}
-
-	return out.Values[len(out.Values)-1], nil
-}
-
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
 	out := new(WorkspaceMembershipResp)
 	opts := &ListOpts{Page: 1, PageLen: pageSize}
